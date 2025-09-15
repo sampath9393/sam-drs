@@ -1,0 +1,17 @@
+{
+  "Parameters": {
+    "CodePipelineStackName": "",
+    "AuthStackName": "",
+    "TablesDBStackName": "",
+    "ApiStackName": "",
+    "DistributionStackName": "",
+    "env": ""
+  },
+  "Tags": {
+    "BusinessUnit": "Engineering",
+    "CostCenter": "00000",
+    "Application": "DRS",
+    "ApplicationOwner": "someone@example.com",
+    "Environment": "Development"
+  }
+}
