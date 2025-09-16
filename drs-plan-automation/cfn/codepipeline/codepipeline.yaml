@@ -32,14 +32,14 @@ Resources:
     Type: AWS::CodePipeline::Pipeline
     Properties:
       Name: drs-plan-automation
-      ArtifactStore:
-        Type: S3
-        Location:
-          Fn::ImportValue: "drs-s3-bucket-name"
-        EncryptionKey:
-          Id:
-            Fn::ImportValue:  "drs-kms-id"
-          Type: 'KMS'
+      # ArtifactStore:
+      #   Type: S3
+      #   Location:
+      #     Fn::ImportValue: "drs-s3-bucket-name"
+        # EncryptionKey:
+        #   Id:
+        #     Fn::ImportValue:  "drs-kms-id"
+        #   Type: 'KMS'
       RoleArn:
         Fn::GetAtt:
           - CodePipelineManageStepsRole
@@ -49,19 +49,21 @@ Resources:
 #          Reason: Wait for updates to baseline solution
       Stages:
         - Name: Source
-          ActionTypeId:
-            Category: Source
-            Owner: AWS
-            Provider: GitHubV2
-            Version: '1'
-          OutputArtifacts:
-            - Name: SourceArtifacts
-          Configuration:
-            ConnectionArn: "arn:aws:codeconnections:us-west-2:868683135740:connection/7853c921-195a-4646-a61e-cb6e109c0732"
-            FullRepositoryId: "sampath9393/sam-drs"
-            BranchName: "main"
-            DetectChanges: true
-          RunOrder: 1
+          Actions:
+            - Name: SourceAction
+              ActionTypeId:
+                Category: Source
+                Owner: AWS
+                Provider: GitHubV2
+                Version: '1'
+              OutputArtifacts:
+                - Name: SourceArtifacts
+              Configuration:
+                ConnectionArn: "arn:aws:codeconnections:us-west-2:24324234232423:connection/7853c921-195a-4646-a61e-cb6e109c0732"
+                FullRepositoryId: "sampath9393/sam-drs"
+                BranchName: "main"
+                DetectChanges: true
+              RunOrder: 1
         - Name: Validate
           Actions:
             - InputArtifacts:
