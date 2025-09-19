@@ -2,19 +2,20 @@
 # SPDX-License-Identifier: Apache-2.0
 
 AWSTemplateFormatVersion: '2010-09-09'
-Description: "CodeBuild project to validate CloudFormation templates and policies for drs-plan-automation"
+Description: "CodeBuild project to validate CloudFormation templates and policies for drs-plan-automation (DEBUG MODE)"
+
 Parameters:
   Application:
     Description: Application Name
     Type: String
-    Default:  drs-plan-automation
+    Default: drs-plan-automation
 
 Resources:
   CodeBuildValidateTemplates:
     Type: AWS::CodeBuild::Project
     Properties:
       Name: ValidateTemplates
-      Description: Validate Cloudformation Templates with cfnnag
+      Description: Debugging repo structure and buildspec path
       ServiceRole:
         Fn::GetAtt:
           - CodeBuildRole
@@ -29,7 +30,25 @@ Resources:
         Image: aws/codebuild/amazonlinux-x86_64-standard:5.0
       Source:
         Type: CODEPIPELINE
-        BuildSpec: drs-plan-automation/cfn/codebuild/ValidateTemplates/buildspec-cfnnag.yml
+        BuildSpec: |
+          version: 0.2
+          phases:
+            install:
+              commands:
+                - echo "=== DEBUGGING BUILD ==="
+                - echo "CodeBuild source directory is: $CODEBUILD_SRC_DIR"
+                - echo "PWD is: $(pwd)"
+                - echo "Listing top-level files:"
+                - ls -al
+                - echo "Listing recursively from $CODEBUILD_SRC_DIR:"
+                - ls -R $CODEBUILD_SRC_DIR
+            build:
+              commands:
+                - echo "If you see your repo files above, source download is working."
+                - echo "Check the path of buildspec-cfnnag.yml relative to repo root."
+          artifacts:
+            files:
+              - '**/*'
       TimeoutInMinutes: 10
       Tags:
         - Key: Application
@@ -74,17 +93,15 @@ Resources:
                   - logs:CreateLogGroup
                 Resource:
                   - Fn::Sub: arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/*
-              - Action:
-                  - 'kms:Encrypt'
-                  - 'kms:Decrypt'
-                  - 'kms:ReEncrypt*'
-                  - 'kms:GenerateDataKey*'
-                  - 'kms:DescribeKey'
+              - Effect: Allow
+                Action:
+                  - kms:Encrypt
+                  - kms:Decrypt
+                  - kms:ReEncrypt*
+                  - kms:GenerateDataKey*
+                  - kms:DescribeKey
                 Resource:
                   Fn::ImportValue: "drs-kms-key-arn"
-                Effect: Allow
       Tags:
         - Key: Application
           Value: !Ref Application
-
-
