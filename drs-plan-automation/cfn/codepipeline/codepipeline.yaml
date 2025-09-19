@@ -32,14 +32,14 @@ Resources:
     Type: AWS::CodePipeline::Pipeline
     Properties:
       Name: drs-plan-automation
-      # ArtifactStore:
-      #   Type: S3
-      #   Location:
-      #     Fn::ImportValue: "drs-s3-bucket-name"
-        # EncryptionKey:
-        #   Id:
-        #     Fn::ImportValue:  "drs-kms-id"
-        #   Type: 'KMS'
+      ArtifactStore:
+        Type: S3
+        Location:
+          Fn::ImportValue: "drs-s3-bucket-name"
+        EncryptionKey:
+          Id:
+            Fn::ImportValue:  "drs-kms-id"
+          Type: 'KMS'
       RoleArn:
         Fn::GetAtt:
           - CodePipelineManageStepsRole
@@ -54,14 +54,15 @@ Resources:
               ActionTypeId:
                 Category: Source
                 Owner: AWS
-                Provider: GitHubV2
+                Provider: CodeStarSourceConnection
                 Version: '1'
               OutputArtifacts:
                 - Name: SourceArtifacts
               Configuration:
-                ConnectionArn: "arn:aws:codeconnections:us-west-2:24324234232423:connection/7853c921-195a-4646-a61e-cb6e109c0732"
+                ConnectionArn: "arn:aws:codeconnections:us-west-2:868683135740:connection/7853c921-195a-4646-a61e-cb6e109c0732"
                 FullRepositoryId: "sampath9393/sam-drs"
                 BranchName: "main"
+                OutputArtifactFormat: "CODE_ZIP"
                 DetectChanges: true
               RunOrder: 1
         - Name: Validate
@@ -226,23 +227,23 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                  - codeconnections:UseConnection
+                  - codestar-connections:UseConnection
                 Resource:
                   - "arn:aws:codeconnections:us-west-2:868683135740:connection/7853c921-195a-4646-a61e-cb6e109c0732"
-              # - Effect: Allow
-              #   Action:
-              #     - s3:GetObject
-              #     - s3:PutObject
-              #     - s3:PutObjectAcl
-              #     - s3:GetObjectVersion
-              #     - s3:GetBucketAcl
-              #     - s3:GetBucketLocation
-              #   Resource:
-              #     - Fn::ImportValue: "drs-s3-bucket-arn"
-              #     - Fn::Sub:
-              #         - "${bucketarn}/*"
-              #         - bucketarn:
-              #             Fn::ImportValue: "drs-s3-bucket-arn"
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                  - s3:PutObjectAcl
+                  - s3:GetObjectVersion
+                  - s3:GetBucketAcl
+                  - s3:GetBucketLocation
+                Resource:
+                  - Fn::ImportValue: "drs-s3-bucket-arn"
+                  - Fn::Sub:
+                      - "${bucketarn}/*"
+                      - bucketarn:
+                          Fn::ImportValue: "drs-s3-bucket-arn"
         - PolicyName: codepipeline-codecommit
           PolicyDocument:
             Version: '2012-10-17'
